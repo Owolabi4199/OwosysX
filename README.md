@@ -1,83 +1,51 @@
 # OwosysX AI Assistant
 
-OwosysX AI is a WhatsApp automation and AI-response system designed to handle customer communication, voice processing, automated posting, and workflow management without direct official affiliation with WhatsApp.
-
-It acts as an intelligent automation layer between users and their customers.
+OwosysX AI is a WhatsApp automation and AI-response system designed to handle customer communication, voice processing, automated posting, and workflow management. It acts as an intelligent automation layer between users and their customers.
 
 ## Features
 
-- 🤖 **AI-Powered Responses** - Intelligent automation for customer communication
-- 💬 **WhatsApp Integration** - Seamless WhatsApp messaging automation
-- 🎤 **Voice Processing** - Handle voice messages and audio processing
-- 📱 **Auto Poster** - Automated content posting capabilities
-- ⚙️ **Workflow Management** - Streamlined automation workflows
+- 🤖 **AI-Powered Responses** - Intelligent automated responses to customer inquiries
+- 💬 **WhatsApp Integration** - Direct WhatsApp automation and messaging
+- 🎙️ **Voice Processing** - Handle and process voice messages and audio content
+- 📱 **Auto Poster** - Automated content posting and distribution
+- 🔄 **Workflow Management** - Streamlined customer communication workflows
+- ⚙️ **Customizable** - Configure automation rules and AI responses
 
 ## Installation
 
-1. Clone the repository:
 ```bash
 git clone https://github.com/Owolabi4199/OwosysX.git
 cd OwosysX
-```
-
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-3. Configure your settings:
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
-
-4. Run the application:
-```bash
-python main.py
+# Installation instructions will be added soon
 ```
 
 ## Usage
 
-### Basic Setup
-
-```python
-from owosysx import OwosysX
-
-# Initialize the AI Assistant
-assistant = OwosysX()
-
-# Handle customer messages
-response = assistant.process_message(user_message)
+```bash
+# Usage examples will be added soon
 ```
 
-### WhatsApp Automation
-
-```python
-# Send automated responses
-assistant.send_whatsapp_message(phone_number, message)
-
-# Handle voice messages
-assistant.process_voice_message(audio_file)
-```
-
-## Prerequisites
+## Requirements
 
 - Python 3.8+
-- WhatsApp Business Account (optional)
-- API keys for AI services
+- Dependencies will be listed in requirements.txt
+
+## Getting Started
+
+Documentation and setup guides are coming soon. Check back for detailed instructions on configuring and deploying OwosysX.
 
 ## Contributing
 
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project.
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project.
 
 ## License
 
-This project is licensed under the Apache License 2.0 - see [LICENSE](LICENSE) file for details.
-
-## Disclaimer
-
-This project is not officially affiliated with WhatsApp or Meta Platforms, Inc. Use responsibly and in accordance with WhatsApp's Terms of Service.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 
-For issues, questions, or suggestions, please open an issue on GitHub.
+For issues, questions, or suggestions, please open an issue on this repository.
+
+---
+
+**Note:** OwosysX is an independent project without direct official affiliation with WhatsApp.
