@@ -1,22 +1,17 @@
 -- Initialize database schema for cold email automation platform
 
--- Enable extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
 -- Workspaces table
 CREATE TABLE IF NOT EXISTS workspaces (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
   owner_id UUID NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  FOREIGN KEY (owner_id) REFERENCES auth.users(id) ON DELETE CASCADE
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- SMTP Credentials table (encrypted)
 CREATE TABLE IF NOT EXISTS smtp_credentials (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   workspace_id UUID NOT NULL,
   email VARCHAR(255) NOT NULL,
   smtp_host VARCHAR(255) NOT NULL,
@@ -32,11 +27,11 @@ CREATE TABLE IF NOT EXISTS smtp_credentials (
 
 -- Campaigns table
 CREATE TABLE IF NOT EXISTS campaigns (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   workspace_id UUID NOT NULL,
   name VARCHAR(255) NOT NULL,
   description TEXT,
-  status VARCHAR(50) DEFAULT 'draft', -- draft, scheduled, active, paused, completed
+  status VARCHAR(50) DEFAULT 'draft',
   scheduled_for TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -45,7 +40,7 @@ CREATE TABLE IF NOT EXISTS campaigns (
 
 -- Email Sequences table
 CREATE TABLE IF NOT EXISTS email_sequences (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   campaign_id UUID NOT NULL,
   order_number INT NOT NULL,
   subject VARCHAR(255) NOT NULL,
@@ -59,13 +54,13 @@ CREATE TABLE IF NOT EXISTS email_sequences (
 
 -- Leads table
 CREATE TABLE IF NOT EXISTS leads (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   campaign_id UUID NOT NULL,
   email VARCHAR(255) NOT NULL,
   first_name VARCHAR(255),
   last_name VARCHAR(255),
   company VARCHAR(255),
-  status VARCHAR(50) DEFAULT 'not_sent', -- not_sent, sent, opened, clicked, replied, qualified, booked_call, unsubscribed
+  status VARCHAR(50) DEFAULT 'not_sent',
   notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -74,7 +69,7 @@ CREATE TABLE IF NOT EXISTS leads (
 
 -- Email Logs table
 CREATE TABLE IF NOT EXISTS email_logs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   lead_id UUID NOT NULL,
   sequence_id UUID NOT NULL,
   campaign_id UUID NOT NULL,
@@ -91,13 +86,13 @@ CREATE TABLE IF NOT EXISTS email_logs (
 
 -- Replies table
 CREATE TABLE IF NOT EXISTS replies (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   lead_id UUID NOT NULL,
   campaign_id UUID NOT NULL,
   email_thread_id VARCHAR(255),
   reply_text TEXT NOT NULL,
   received_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  categorized_as VARCHAR(50), -- interested, not_interested, out_of_office, spam, other
+  categorized_as VARCHAR(50),
   human_reviewed BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE,
@@ -106,7 +101,7 @@ CREATE TABLE IF NOT EXISTS replies (
 
 -- Booked Calls table
 CREATE TABLE IF NOT EXISTS booked_calls (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   lead_id UUID NOT NULL,
   campaign_id UUID NOT NULL,
   scheduled_time TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -120,14 +115,14 @@ CREATE TABLE IF NOT EXISTS booked_calls (
 );
 
 -- Create indexes for better query performance
-CREATE INDEX idx_campaigns_workspace ON campaigns(workspace_id);
-CREATE INDEX idx_leads_campaign ON leads(campaign_id);
-CREATE INDEX idx_email_logs_lead ON email_logs(lead_id);
-CREATE INDEX idx_email_logs_tracking ON email_logs(tracking_token);
-CREATE INDEX idx_replies_lead ON replies(lead_id);
-CREATE INDEX idx_booked_calls_lead ON booked_calls(lead_id);
-CREATE INDEX idx_smtp_credentials_workspace ON smtp_credentials(workspace_id);
-CREATE INDEX idx_email_sequences_campaign ON email_sequences(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_campaigns_workspace ON campaigns(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_leads_campaign ON leads(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_email_logs_lead ON email_logs(lead_id);
+CREATE INDEX IF NOT EXISTS idx_email_logs_tracking ON email_logs(tracking_token);
+CREATE INDEX IF NOT EXISTS idx_replies_lead ON replies(lead_id);
+CREATE INDEX IF NOT EXISTS idx_booked_calls_lead ON booked_calls(lead_id);
+CREATE INDEX IF NOT EXISTS idx_smtp_credentials_workspace ON smtp_credentials(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_email_sequences_campaign ON email_sequences(campaign_id);
 
 -- Set up RLS (Row Level Security) policies
 ALTER TABLE workspaces ENABLE ROW LEVEL SECURITY;
@@ -146,6 +141,9 @@ CREATE POLICY "Users can see own workspaces" ON workspaces
 CREATE POLICY "Users can create workspaces" ON workspaces
   FOR INSERT WITH CHECK (owner_id = auth.uid());
 
+CREATE POLICY "Users can update their workspaces" ON workspaces
+  FOR UPDATE USING (owner_id = auth.uid());
+
 -- RLS policy: Users can see campaigns in their workspaces
 CREATE POLICY "Users can see campaigns in their workspaces" ON campaigns
   FOR SELECT USING (workspace_id IN (
@@ -154,6 +152,11 @@ CREATE POLICY "Users can see campaigns in their workspaces" ON campaigns
 
 CREATE POLICY "Users can create campaigns in their workspaces" ON campaigns
   FOR INSERT WITH CHECK (workspace_id IN (
+    SELECT id FROM workspaces WHERE owner_id = auth.uid()
+  ));
+
+CREATE POLICY "Users can update campaigns in their workspaces" ON campaigns
+  FOR UPDATE USING (workspace_id IN (
     SELECT id FROM workspaces WHERE owner_id = auth.uid()
   ));
 
@@ -172,33 +175,55 @@ CREATE POLICY "Users can create leads in their campaigns" ON leads
     )
   ));
 
+CREATE POLICY "Users can update leads in their campaigns" ON leads
+  FOR UPDATE USING (campaign_id IN (
+    SELECT id FROM campaigns WHERE workspace_id IN (
+      SELECT id FROM workspaces WHERE owner_id = auth.uid()
+    )
+  ));
+
 -- RLS policy: Users can see email logs for their leads
 CREATE POLICY "Users can see email logs" ON email_logs
-  FOR SELECT USING (lead_id IN (
-    SELECT id FROM leads WHERE campaign_id IN (
-      SELECT id FROM campaigns WHERE workspace_id IN (
-        SELECT id FROM workspaces WHERE owner_id = auth.uid()
-      )
+  FOR SELECT USING (campaign_id IN (
+    SELECT id FROM campaigns WHERE workspace_id IN (
+      SELECT id FROM workspaces WHERE owner_id = auth.uid()
+    )
+  ));
+
+CREATE POLICY "Users can create email logs" ON email_logs
+  FOR INSERT WITH CHECK (campaign_id IN (
+    SELECT id FROM campaigns WHERE workspace_id IN (
+      SELECT id FROM workspaces WHERE owner_id = auth.uid()
     )
   ));
 
 -- RLS policy: Users can see replies for their leads
 CREATE POLICY "Users can see replies" ON replies
-  FOR SELECT USING (lead_id IN (
-    SELECT id FROM leads WHERE campaign_id IN (
-      SELECT id FROM campaigns WHERE workspace_id IN (
-        SELECT id FROM workspaces WHERE owner_id = auth.uid()
-      )
+  FOR SELECT USING (campaign_id IN (
+    SELECT id FROM campaigns WHERE workspace_id IN (
+      SELECT id FROM workspaces WHERE owner_id = auth.uid()
+    )
+  ));
+
+CREATE POLICY "Users can create replies" ON replies
+  FOR INSERT WITH CHECK (campaign_id IN (
+    SELECT id FROM campaigns WHERE workspace_id IN (
+      SELECT id FROM workspaces WHERE owner_id = auth.uid()
     )
   ));
 
 -- RLS policy: Users can see booked calls for their leads
 CREATE POLICY "Users can see booked calls" ON booked_calls
-  FOR SELECT USING (lead_id IN (
-    SELECT id FROM leads WHERE campaign_id IN (
-      SELECT id FROM campaigns WHERE workspace_id IN (
-        SELECT id FROM workspaces WHERE owner_id = auth.uid()
-      )
+  FOR SELECT USING (campaign_id IN (
+    SELECT id FROM campaigns WHERE workspace_id IN (
+      SELECT id FROM workspaces WHERE owner_id = auth.uid()
+    )
+  ));
+
+CREATE POLICY "Users can create booked calls" ON booked_calls
+  FOR INSERT WITH CHECK (campaign_id IN (
+    SELECT id FROM campaigns WHERE workspace_id IN (
+      SELECT id FROM workspaces WHERE owner_id = auth.uid()
     )
   ));
 
@@ -211,4 +236,31 @@ CREATE POLICY "Users can see smtp credentials" ON smtp_credentials
 CREATE POLICY "Users can create smtp credentials" ON smtp_credentials
   FOR INSERT WITH CHECK (workspace_id IN (
     SELECT id FROM workspaces WHERE owner_id = auth.uid()
+  ));
+
+CREATE POLICY "Users can update smtp credentials" ON smtp_credentials
+  FOR UPDATE USING (workspace_id IN (
+    SELECT id FROM workspaces WHERE owner_id = auth.uid()
+  ));
+
+-- Email Sequences RLS policies
+CREATE POLICY "Users can see email sequences" ON email_sequences
+  FOR SELECT USING (campaign_id IN (
+    SELECT id FROM campaigns WHERE workspace_id IN (
+      SELECT id FROM workspaces WHERE owner_id = auth.uid()
+    )
+  ));
+
+CREATE POLICY "Users can create email sequences" ON email_sequences
+  FOR INSERT WITH CHECK (campaign_id IN (
+    SELECT id FROM campaigns WHERE workspace_id IN (
+      SELECT id FROM workspaces WHERE owner_id = auth.uid()
+    )
+  ));
+
+CREATE POLICY "Users can update email sequences" ON email_sequences
+  FOR UPDATE USING (campaign_id IN (
+    SELECT id FROM campaigns WHERE workspace_id IN (
+      SELECT id FROM workspaces WHERE owner_id = auth.uid()
+    )
   ));
