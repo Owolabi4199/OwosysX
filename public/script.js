@@ -25,6 +25,8 @@
   // ──────────────────────────────────────────────
   let state = {
     isPro: false,
+    tier: "guest", // "guest" | "free" | "pro"
+    userId: null,
     invoiceCount: parseInt(localStorage.getItem("vtx_invoice_count") || "0", 10),
     sessionId: localStorage.getItem("vtx_session_id") || generateSessionId(),
     invoiceSeq: parseInt(localStorage.getItem("vtx_invoice_seq") || "1000", 10),
@@ -99,6 +101,12 @@
       authUserMenu: $("auth-user-menu"),
       authUserEmail: $("auth-user-email"),
       btnAuthLogout: $("btn-auth-logout"),
+      // Verify payment elements
+      verifyPaymentSection: $("verify-payment-section"),
+      verifyTxId: $("verify-tx-id"),
+      btnVerifyPayment: $("btn-verify-payment"),
+      verifyStatus: $("verify-status"),
+      upgradeLoginPrompt: $("upgrade-login-prompt"),
     };
 
     // ──────────────────────────────────────────────
@@ -115,30 +123,35 @@
     }
 
     // ──────────────────────────────────────────────
-    // AUTH
+    // AUTH (3-tier: guest / free / pro)
     // ──────────────────────────────────────────────
     async function checkAuthStatus() {
       try {
         const res = await fetch("/api/auth/status");
         const data = await res.json();
 
-        if (data.authenticated && data.isPro) {
-          state.isPro = true;
-          updateProUI(data.email);
+        state.tier = data.tier || "guest";
+        state.isPro = data.isPro === true;
+        state.userId = data.id || null;
+
+        if (state.tier === "pro") {
+          updateProUI(data.email, data.expiresAt);
+        } else if (state.tier === "free") {
+          updateFreeUI(data.email);
         } else {
-          state.isPro = false;
           updateGuestUI();
         }
       } catch (e) {
+        state.tier = "guest";
         state.isPro = false;
         updateGuestUI();
       }
     }
 
-    function updateProUI(email) {
+    function updateProUI(email, expiresAt) {
       // Show Pro badge
       els.planBadge.textContent = "Pro Plan";
-      els.planBadge.classList.remove("bg-[#1E293B]", "text-[#94A3B8]");
+      els.planBadge.classList.remove("bg-[#1E293B]", "text-[#94A3B8]", "bg-[#F59E0B]/20", "text-[#F59E0B]");
       els.planBadge.classList.add("bg-[#3B82F6]/20", "text-[#3B82F6]");
 
       // Hide upgrade button
@@ -152,39 +165,132 @@
       }
       if (els.authUserEmail && email) els.authUserEmail.textContent = email;
 
-      // Update usage UI for unlimited
-      if (els.usageCounter) els.usageCounter.textContent = "Unlimited";
-      if (els.usageBar) els.usageBar.style.width = "100%";
+      updateUsageUI();
+    }
+
+    function updateFreeUI(email) {
+      // Show Free badge
+      els.planBadge.textContent = "Free Plan";
+      els.planBadge.classList.remove("bg-[#3B82F6]/20", "text-[#3B82F6]");
+      els.planBadge.classList.add("bg-[#1E293B]", "text-[#94A3B8]");
+
+      // Show upgrade button
+      els.btnUpgradeNav.classList.remove("hidden");
+
+      // Show user menu, hide login
+      if (els.btnAuthLogin) els.btnAuthLogin.classList.add("hidden");
+      if (els.authUserMenu) {
+        els.authUserMenu.classList.remove("hidden");
+        els.authUserMenu.classList.add("flex");
+      }
+      if (els.authUserEmail && email) els.authUserEmail.textContent = email;
 
       updateUsageUI();
     }
 
     function updateGuestUI() {
-      // Show login button
+      // Show Guest badge
+      els.planBadge.textContent = "Guest";
+      els.planBadge.classList.remove("bg-[#3B82F6]/20", "text-[#3B82F6]");
+      els.planBadge.classList.add("bg-[#1E293B]", "text-[#94A3B8]");
+
+      // Show upgrade + login buttons
+      els.btnUpgradeNav.classList.remove("hidden");
       if (els.btnAuthLogin) {
         els.btnAuthLogin.classList.remove("hidden");
         els.btnAuthLogin.classList.add("inline-flex");
       }
       // Hide user menu
       if (els.authUserMenu) els.authUserMenu.classList.add("hidden");
+
+      updateUsageUI();
     }
 
     async function handleLogout() {
       try {
         await fetch("/api/auth/logout", { method: "POST" });
         state.isPro = false;
+        state.tier = "guest";
+        state.userId = null;
         updateGuestUI();
-
-        // Reset badge
-        els.planBadge.textContent = "Free Plan";
-        els.planBadge.classList.remove("bg-[#3B82F6]/20", "text-[#3B82F6]");
-        els.planBadge.classList.add("bg-[#1E293B]", "text-[#94A3B8]");
-        els.btnUpgradeNav.classList.remove("hidden");
-
-        updateUsageUI();
-        showToast("Signed Out", "You are now using the free plan.", "info");
+        showToast("Signed Out", "You are now browsing as a guest.", "info");
       } catch (e) {
         showToast("Error", "Failed to sign out.", "error");
+      }
+    }
+
+    // Show/hide verify section based on auth state when upgrade modal opens
+    function updateUpgradeModalForTier() {
+      if (state.tier === "free") {
+        // Logged in but not Pro -- show verify section, hide login prompt
+        if (els.verifyPaymentSection) els.verifyPaymentSection.classList.remove("hidden");
+        if (els.upgradeLoginPrompt) els.upgradeLoginPrompt.classList.add("hidden");
+      } else if (state.tier === "guest") {
+        // Not logged in -- hide verify, show login prompt
+        if (els.verifyPaymentSection) els.verifyPaymentSection.classList.add("hidden");
+        if (els.upgradeLoginPrompt) els.upgradeLoginPrompt.classList.remove("hidden");
+      } else {
+        // Pro -- shouldn't see this modal, but hide both
+        if (els.verifyPaymentSection) els.verifyPaymentSection.classList.add("hidden");
+        if (els.upgradeLoginPrompt) els.upgradeLoginPrompt.classList.add("hidden");
+      }
+    }
+
+    async function handleVerifyPayment() {
+      const txId = els.verifyTxId.value.trim();
+      if (!txId) {
+        showVerifyStatus("Please enter a transaction ID.", "error");
+        return;
+      }
+
+      if (state.tier === "guest") {
+        showVerifyStatus("Please sign in first to verify your payment.", "error");
+        return;
+      }
+
+      els.btnVerifyPayment.disabled = true;
+      els.btnVerifyPayment.textContent = "Verifying...";
+
+      try {
+        const res = await fetch("/api/flutterwave/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ transaction_id: txId }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.status === "success") {
+          showVerifyStatus(data.message, "success");
+          state.isPro = true;
+          state.tier = "pro";
+          updateProUI(null, data.expires_at);
+
+          // Close modal after a moment
+          setTimeout(function () {
+            els.upgradeModal.style.display = "none";
+            showToast("Pro Activated", "Enjoy unlimited invoices!", "success");
+          }, 1500);
+        } else {
+          showVerifyStatus(data.error || "Verification failed.", "error");
+        }
+      } catch (e) {
+        showVerifyStatus("Network error. Please try again.", "error");
+      }
+
+      els.btnVerifyPayment.disabled = false;
+      els.btnVerifyPayment.textContent = "Verify";
+    }
+
+    function showVerifyStatus(msg, type) {
+      els.verifyStatus.textContent = msg;
+      els.verifyStatus.classList.remove("hidden", "text-[#22C55E]", "text-red-400", "text-[#94A3B8]");
+      if (type === "success") {
+        els.verifyStatus.classList.add("text-[#22C55E]");
+      } else if (type === "error") {
+        els.verifyStatus.classList.add("text-red-400");
+      } else {
+        els.verifyStatus.classList.add("text-[#94A3B8]");
       }
     }
 
@@ -354,7 +460,7 @@
 
     // ──────────────────────────────────────────────
     // LOGO UPLOAD
-    // ──────────────────────────────────────────────
+    // ────��─────────────────────────────────────────
     function handleLogoUpload(file) {
       if (!file || !file.type.startsWith("image/")) return;
       const reader = new FileReader();
@@ -783,6 +889,7 @@
     // MODALS
     // ──────────────────────────────────────────────
     function showUpgradeModal() {
+      updateUpgradeModalForTier();
       els.upgradeModal.classList.remove("hidden");
       els.upgradeModal.classList.add("flex");
     }
@@ -837,7 +944,13 @@
     // FLUTTERWAVE
     // ──────────────────────────────────────────────
     function handleFlutterwaveCheckout() {
-      window.open(FLUTTERWAVE_PAYMENT_LINK, "_blank");
+      // Append user ID as tx_ref param if logged in so webhook can match user
+      var link = FLUTTERWAVE_PAYMENT_LINK;
+      if (state.userId) {
+        var txRef = "vtx_pro_" + state.userId + "_" + Date.now();
+        link += (link.includes("?") ? "&" : "?") + "tx_ref=" + encodeURIComponent(txRef);
+      }
+      window.open(link, "_blank");
     }
 
     // ──────────────────────────────────────────────
@@ -940,6 +1053,11 @@
 
       // Flutterwave checkout
       els.btnFlutterwaveCheckout.addEventListener("click", handleFlutterwaveCheckout);
+
+      // Verify payment
+      if (els.btnVerifyPayment) {
+        els.btnVerifyPayment.addEventListener("click", handleVerifyPayment);
+      }
 
       // Waitlist modal
       els.btnWaitlistFooter.addEventListener("click", showWaitlistModal);

@@ -774,6 +774,38 @@ export default function InvoicePage() {
             <p className="mt-3 text-center text-[10px] text-[#475569]">
               Powered by Flutterwave. Cancel anytime.
             </p>
+
+            {/* Verify Payment Section - shown for logged in users */}
+            <div id="verify-payment-section" className="mt-5 hidden border-t border-[#1E293B] pt-5">
+              <p className="mb-2 text-xs font-medium text-[#94A3B8]">
+                Already paid? Enter your Flutterwave transaction ID:
+              </p>
+              <div className="flex gap-2">
+                <input
+                  id="verify-tx-id"
+                  type="text"
+                  placeholder="e.g. 4924839"
+                  className="flex-1 rounded-lg border border-[#1E293B] bg-[#0A0F1C] px-3 py-2 text-sm text-white placeholder-[#475569] focus:border-[#3B82F6] focus:outline-none focus:ring-1 focus:ring-[#3B82F6]/50"
+                />
+                <button
+                  id="btn-verify-payment"
+                  type="button"
+                  className="shrink-0 rounded-lg bg-[#22C55E] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#16A34A] focus:outline-none focus:ring-2 focus:ring-[#22C55E]/50"
+                >
+                  Verify
+                </button>
+              </div>
+              <p id="verify-status" className="mt-2 hidden text-xs"></p>
+            </div>
+
+            {/* Login prompt for guests */}
+            <div id="upgrade-login-prompt" className="mt-4 hidden rounded-lg bg-[#0A0F1C] p-3 text-center">
+              <p className="text-xs text-[#94A3B8]">
+                <a href="/auth/login" className="font-semibold text-[#3B82F6] hover:underline">Sign in</a> or
+                <a href="/auth/sign-up" className="font-semibold text-[#3B82F6] hover:underline"> create an account</a>
+                {' '}to verify your payment and keep Pro access.
+              </p>
+            </div>
           </div>
         </div>
 
