@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createServerSupabaseClient } from '@/lib/supabase'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { verifyTransaction } from '@/lib/flutterwave'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

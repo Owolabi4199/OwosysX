@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
-import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { createBrowserSupabaseClient } from '@/lib/supabase-client'
 import { DashboardLayout } from '@/components/dashboard/dashboard-layout'
 import { CampaignsList } from './campaigns-list'
 import { Button } from '@/components/ui/button'

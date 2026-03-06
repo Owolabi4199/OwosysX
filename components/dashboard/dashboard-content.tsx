@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { createBrowserSupabaseClient } from '@/lib/supabase-client'
 import { User } from '@supabase/supabase-js'
 import { DashboardLayout } from './dashboard-layout'
 import { DashboardStats } from './dashboard-stats'

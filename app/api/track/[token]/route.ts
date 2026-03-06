@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { token } = await params
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
 
     // Update email log with open
     const { error } = await supabase

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
-import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { createBrowserSupabaseClient } from '@/lib/supabase-client'
 import { DashboardLayout } from '@/components/dashboard/dashboard-layout'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'

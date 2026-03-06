@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Search, MoreHorizontal, Shield, UserCog } from 'lucide-react'
-import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { createBrowserSupabaseClient } from '@/lib/supabase-client'
 
 interface AdminUsersClientProps {
   initialUsers: UserProfile[]

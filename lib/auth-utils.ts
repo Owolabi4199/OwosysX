@@ -1,7 +1,7 @@
-import { createClient } from './supabase'
+import { createServerSupabaseClient } from './supabase-server'
 
 export async function getCurrentUser() {
-  const supabase = createClient()
+  const supabase = await createServerSupabaseClient()
   try {
     const {
       data: { user },
@@ -17,7 +17,7 @@ export async function getCurrentWorkspace() {
   const user = await getCurrentUser()
   if (!user) return null
 
-  const supabase = createClient()
+  const supabase = await createServerSupabaseClient()
   const { data: workspace, error } = await supabase
     .from('workspaces')
     .select('*')
@@ -33,7 +33,7 @@ export async function getCurrentWorkspace() {
 }
 
 export async function createWorkspace(userId: string, name: string) {
-  const supabase = createClient()
+  const supabase = await createServerSupabaseClient()
   const { data: workspace, error } = await supabase
     .from('workspaces')
     .insert([

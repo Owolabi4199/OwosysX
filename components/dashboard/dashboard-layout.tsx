@@ -2,7 +2,7 @@
 
 import { ReactNode, useState } from 'react'
 import { User } from '@supabase/supabase-js'
-import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { createBrowserSupabaseClient } from '@/lib/supabase-client'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {

@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from '@/lib/supabase'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { AdminUsersClient } from '@/components/admin/admin-users-client'
 
 async function getUsers() {
