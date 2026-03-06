@@ -1,6 +1,6 @@
 /**
  * VantrexTech AI Invoice Assistant
- * Full Vanilla JS logic — invoice creation, AI parsing, PDF, Supabase, Stripe
+ * Full Vanilla JS logic — invoice creation, AI parsing, PDF, Supabase, Flutterwave
  */
 
 (function () {
