@@ -4,8 +4,8 @@ import { NextResponse } from "next/server";
 
 const invoiceSchema = z.object({
   clientName: z.string().describe("Client or customer name"),
-  clientEmail: z.string().optional().describe("Client email if mentioned"),
-  clientAddress: z.string().optional().describe("Client address if mentioned"),
+  clientEmail: z.string().nullable().describe("Client email if mentioned, null if not"),
+  clientAddress: z.string().nullable().describe("Client address if mentioned, null if not"),
   items: z.array(
     z.object({
       description: z.string().describe("Line item description"),
@@ -13,10 +13,10 @@ const invoiceSchema = z.object({
       unitPrice: z.number().describe("Unit price in dollars"),
     })
   ).describe("Line items for the invoice"),
-  taxRate: z.number().optional().describe("Tax rate as a percentage number, e.g. 10 for 10%"),
-  dueDate: z.string().optional().describe("Due date in YYYY-MM-DD format. If relative like 'tomorrow' or 'next week', calculate from today."),
-  notes: z.string().optional().describe("Any additional notes"),
-  currency: z.string().optional().describe("Currency code like USD, EUR, GBP. Default USD."),
+  taxRate: z.number().nullable().describe("Tax rate as a percentage number, e.g. 10 for 10%. Null if not mentioned."),
+  dueDate: z.string().nullable().describe("Due date in YYYY-MM-DD format. If relative like 'tomorrow' or 'next week', calculate from today. Null if not mentioned."),
+  notes: z.string().nullable().describe("Any additional notes. Null if none."),
+  currency: z.string().describe("Currency code like USD, EUR, GBP. Default USD if not mentioned."),
 });
 
 export async function POST(request: Request) {
