@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { decrypt } from '@/lib/encryption'
 import { NextRequest, NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
 
@@ -73,14 +74,26 @@ export async function POST(
       )
     }
 
-    // Create transporter (NOTE: In production, decrypt the password from a secure vault)
+    // Decrypt the password from encrypted storage
+    let decryptedPassword: string
+    try {
+      decryptedPassword = decrypt(smtpCreds.smtp_password_encrypted)
+    } catch (decryptError) {
+      console.error('Error decrypting SMTP password:', decryptError)
+      return NextResponse.json(
+        { error: 'Failed to decrypt SMTP credentials' },
+        { status: 500 }
+      )
+    }
+
+    // Create transporter with decrypted password
     const transporter = nodemailer.createTransport({
       host: smtpCreds.smtp_host,
       port: smtpCreds.smtp_port,
       secure: smtpCreds.smtp_port === 465,
       auth: {
         user: smtpCreds.smtp_user,
-        pass: smtpCreds.smtp_password_encrypted, // Should be decrypted from vault
+        pass: decryptedPassword,
       },
     })
 
