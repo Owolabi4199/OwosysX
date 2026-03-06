@@ -10,8 +10,8 @@
   // CONFIG
   // ──────────────────────────────────────────────
   const FREE_INVOICE_LIMIT = 3;
-  // REPLACE with your real Stripe payment link
-  const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/test_XXXXXXXX";
+  // REPLACE with your real Flutterwave payment link
+  const FLUTTERWAVE_PAYMENT_LINK = "https://flutterwave.com/pay/XXXXXXXX";
   const CURRENCY_SYMBOLS = {
     USD: "$",
     EUR: "\u20AC",
@@ -80,7 +80,7 @@
       btnUpgradeNav: $("btn-upgrade-nav"),
       upgradeModal: $("upgrade-modal"),
       btnCloseUpgrade: $("btn-close-upgrade"),
-      btnStripeCheckout: $("btn-stripe-checkout"),
+      btnFlutterwaveCheckout: $("btn-flutterwave-checkout"),
       waitlistModal: $("waitlist-modal"),
       btnCloseWaitlist: $("btn-close-waitlist"),
       btnWaitlistFooter: $("btn-waitlist-footer"),
@@ -750,10 +750,10 @@
     }
 
     // ──────────────────────────────────────────────
-    // STRIPE
+    // FLUTTERWAVE
     // ──────────────────────────────────────────────
-    function handleStripeCheckout() {
-      window.open(STRIPE_PAYMENT_LINK, "_blank");
+    function handleFlutterwaveCheckout() {
+      window.open(FLUTTERWAVE_PAYMENT_LINK, "_blank");
     }
 
     // ──────────────────────────────────────────────
@@ -854,8 +854,8 @@
         if (e.target === els.upgradeModal) hideUpgradeModal();
       });
 
-      // Stripe checkout
-      els.btnStripeCheckout.addEventListener("click", handleStripeCheckout);
+      // Flutterwave checkout
+      els.btnFlutterwaveCheckout.addEventListener("click", handleFlutterwaveCheckout);
 
       // Waitlist modal
       els.btnWaitlistFooter.addEventListener("click", showWaitlistModal);

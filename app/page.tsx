@@ -743,14 +743,14 @@ export default function InvoicePage() {
               <span className="text-sm text-[#64748B]">/month</span>
             </div>
             <button
-              id="btn-stripe-checkout"
+              id="btn-flutterwave-checkout"
               type="button"
               className="w-full rounded-xl bg-[#3B82F6] py-3.5 text-sm font-bold text-white transition hover:bg-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50"
             >
               Subscribe Now
             </button>
             <p className="mt-3 text-center text-[10px] text-[#475569]">
-              Powered by Stripe. Cancel anytime.
+              Powered by Flutterwave. Cancel anytime.
             </p>
           </div>
         </div>
