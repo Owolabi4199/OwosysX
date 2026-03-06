@@ -24,10 +24,10 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get campaign and sequences
+    // Get campaign and verify ownership through workspace
     const { data: campaign, error: campaignError } = await supabase
       .from('campaigns')
-      .select('*')
+      .select('*, workspaces(owner_id)')
       .eq('id', campaignId)
       .single()
 
@@ -35,6 +35,15 @@ export async function POST(
       return NextResponse.json(
         { error: 'Campaign not found' },
         { status: 404 }
+      )
+    }
+
+    // Verify that the user owns the workspace that owns this campaign
+    const workspace = (campaign as any).workspaces
+    if (!workspace || workspace.owner_id !== user.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized: You do not have access to this campaign' },
+        { status: 403 }
       )
     }
 

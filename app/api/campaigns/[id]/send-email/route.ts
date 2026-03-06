@@ -31,6 +31,34 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Verify user owns the campaign before proceeding
+    const { data: campaign, error: campaignCheckError } = await supabase
+      .from('campaigns')
+      .select('workspace_id')
+      .eq('id', body.campaignId)
+      .single()
+
+    if (campaignCheckError || !campaign) {
+      return NextResponse.json(
+        { error: 'Campaign not found' },
+        { status: 404 }
+      )
+    }
+
+    // Verify user owns the workspace that owns this campaign
+    const { data: workspace, error: workspaceError } = await supabase
+      .from('workspaces')
+      .select('owner_id')
+      .eq('id', campaign.workspace_id)
+      .single()
+
+    if (workspaceError || !workspace || workspace.owner_id !== user.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized: You do not have access to this campaign' },
+        { status: 403 }
+      )
+    }
+
     // Get SMTP credentials
     const { data: smtpCreds, error: smtpError } = await supabase
       .from('smtp_credentials')
