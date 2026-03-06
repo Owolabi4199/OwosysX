@@ -1,8 +1,32 @@
 import crypto from 'crypto'
 
-const FLUTTERWAVE_SECRET_KEY = process.env.FLUTTERWAVE_SECRET_KEY!
-const FLUTTERWAVE_PUBLIC_KEY = process.env.FLUTTERWAVE_PUBLIC_KEY!
-const FLUTTERWAVE_WEBHOOK_SECRET = process.env.FLUTTERWAVE_WEBHOOK_SECRET!
+// Validate required environment variables at module load time
+function validateEnv() {
+  const missingVars: string[] = []
+
+  if (!process.env.FLUTTERWAVE_SECRET_KEY) {
+    missingVars.push('FLUTTERWAVE_SECRET_KEY')
+  }
+  if (!process.env.FLUTTERWAVE_PUBLIC_KEY) {
+    missingVars.push('FLUTTERWAVE_PUBLIC_KEY')
+  }
+  if (!process.env.FLUTTERWAVE_WEBHOOK_SECRET) {
+    missingVars.push('FLUTTERWAVE_WEBHOOK_SECRET')
+  }
+
+  if (missingVars.length > 0) {
+    throw new Error(
+      `Missing required Flutterwave environment variables: ${missingVars.join(', ')}. ` +
+      'Please ensure these are set in your environment.'
+    )
+  }
+}
+
+validateEnv()
+
+const FLUTTERWAVE_SECRET_KEY = process.env.FLUTTERWAVE_SECRET_KEY as string
+const FLUTTERWAVE_PUBLIC_KEY = process.env.FLUTTERWAVE_PUBLIC_KEY as string
+const FLUTTERWAVE_WEBHOOK_SECRET = process.env.FLUTTERWAVE_WEBHOOK_SECRET as string
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
 export interface FlutterwavePaymentPayload {
