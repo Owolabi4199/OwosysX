@@ -94,6 +94,11 @@
       toastTitle: $("toast-title"),
       toastMessage: $("toast-message"),
       toastIcon: $("toast-icon"),
+      // Auth elements
+      btnAuthLogin: $("btn-auth-login"),
+      authUserMenu: $("auth-user-menu"),
+      authUserEmail: $("auth-user-email"),
+      btnAuthLogout: $("btn-auth-logout"),
     };
 
     // ──────────────────────────────────────────────
@@ -106,6 +111,81 @@
       updateSummary();
       updateUsageUI();
       bindEvents();
+      checkAuthStatus();
+    }
+
+    // ──────────────────────────────────────────────
+    // AUTH
+    // ──────────────────────────────────────────────
+    async function checkAuthStatus() {
+      try {
+        const res = await fetch("/api/auth/status");
+        const data = await res.json();
+
+        if (data.authenticated && data.isPro) {
+          state.isPro = true;
+          updateProUI(data.email);
+        } else {
+          state.isPro = false;
+          updateGuestUI();
+        }
+      } catch (e) {
+        state.isPro = false;
+        updateGuestUI();
+      }
+    }
+
+    function updateProUI(email) {
+      // Show Pro badge
+      els.planBadge.textContent = "Pro Plan";
+      els.planBadge.classList.remove("bg-[#1E293B]", "text-[#94A3B8]");
+      els.planBadge.classList.add("bg-[#3B82F6]/20", "text-[#3B82F6]");
+
+      // Hide upgrade button
+      els.btnUpgradeNav.classList.add("hidden");
+
+      // Show user menu, hide login
+      if (els.btnAuthLogin) els.btnAuthLogin.classList.add("hidden");
+      if (els.authUserMenu) {
+        els.authUserMenu.classList.remove("hidden");
+        els.authUserMenu.classList.add("flex");
+      }
+      if (els.authUserEmail && email) els.authUserEmail.textContent = email;
+
+      // Update usage UI for unlimited
+      if (els.usageCounter) els.usageCounter.textContent = "Unlimited";
+      if (els.usageBar) els.usageBar.style.width = "100%";
+
+      updateUsageUI();
+    }
+
+    function updateGuestUI() {
+      // Show login button
+      if (els.btnAuthLogin) {
+        els.btnAuthLogin.classList.remove("hidden");
+        els.btnAuthLogin.classList.add("inline-flex");
+      }
+      // Hide user menu
+      if (els.authUserMenu) els.authUserMenu.classList.add("hidden");
+    }
+
+    async function handleLogout() {
+      try {
+        await fetch("/api/auth/logout", { method: "POST" });
+        state.isPro = false;
+        updateGuestUI();
+
+        // Reset badge
+        els.planBadge.textContent = "Free Plan";
+        els.planBadge.classList.remove("bg-[#3B82F6]/20", "text-[#3B82F6]");
+        els.planBadge.classList.add("bg-[#1E293B]", "text-[#94A3B8]");
+        els.btnUpgradeNav.classList.remove("hidden");
+
+        updateUsageUI();
+        showToast("Signed Out", "You are now using the free plan.", "info");
+      } catch (e) {
+        showToast("Error", "Failed to sign out.", "error");
+      }
     }
 
     function setTodayDate() {
@@ -234,6 +314,18 @@
     // USAGE / PRO
     // ──────────────────────────────────────────────
     function updateUsageUI() {
+      if (state.isPro) {
+        els.usageCounter.textContent = "Unlimited";
+        els.usageBar.style.width = "100%";
+        els.usageBar.classList.remove("bg-red-500");
+        els.usageBar.classList.add("bg-[#3B82F6]");
+        els.planBadge.textContent = "Pro Plan";
+        els.planBadge.classList.remove("bg-[#1E293B]", "text-[#94A3B8]");
+        els.planBadge.classList.add("bg-[#3B82F6]/20", "text-[#3B82F6]");
+        els.btnUpgradeNav.classList.add("hidden");
+        return;
+      }
+
       const used = state.invoiceCount;
       els.usageCounter.textContent = used + " / " + FREE_INVOICE_LIMIT;
       const pct = Math.min((used / FREE_INVOICE_LIMIT) * 100, 100);
@@ -242,13 +334,6 @@
       if (pct >= 100) {
         els.usageBar.classList.remove("bg-[#3B82F6]");
         els.usageBar.classList.add("bg-red-500");
-      }
-
-      if (state.isPro) {
-        els.planBadge.textContent = "Pro Plan";
-        els.planBadge.classList.remove("bg-[#1E293B]", "text-[#94A3B8]");
-        els.planBadge.classList.add("bg-[#3B82F6]/20", "text-[#3B82F6]");
-        els.btnUpgradeNav.classList.add("hidden");
       }
     }
 
@@ -863,6 +948,11 @@
         if (e.target === els.waitlistModal) hideWaitlistModal();
       });
       els.waitlistForm.addEventListener("submit", handleWaitlistSubmit);
+
+      // Auth logout
+      if (els.btnAuthLogout) {
+        els.btnAuthLogout.addEventListener("click", handleLogout);
+      }
     }
 
     // ──────────────────────────────────────────────

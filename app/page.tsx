@@ -47,6 +47,28 @@ export default function InvoicePage() {
               >
                 Upgrade
               </button>
+              {/* Auth: Login (shown for guests) */}
+              <a
+                id="btn-auth-login"
+                href="/auth/login"
+                className="hidden rounded-lg border border-[#1E293B] bg-[#1E293B]/50 px-3 py-1.5 text-[11px] font-medium text-[#94A3B8] transition hover:bg-[#1E293B] hover:text-white sm:px-4 sm:py-2 sm:text-xs"
+              >
+                Sign In
+              </a>
+              {/* Auth: User menu (shown for logged-in users) */}
+              <div id="auth-user-menu" className="hidden items-center gap-1.5 sm:gap-2">
+                <span
+                  id="auth-user-email"
+                  className="hidden max-w-[100px] truncate text-[10px] text-[#94A3B8] sm:inline-block sm:max-w-[140px] sm:text-xs"
+                ></span>
+                <button
+                  id="btn-auth-logout"
+                  type="button"
+                  className="rounded-lg border border-[#1E293B] bg-[#1E293B]/50 px-3 py-1.5 text-[11px] font-medium text-[#94A3B8] transition hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30 sm:px-4 sm:py-2 sm:text-xs"
+                >
+                  Sign Out
+                </button>
+              </div>
             </div>
           </div>
         </header>
