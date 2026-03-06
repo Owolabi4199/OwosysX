@@ -21,7 +21,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Search, MoreHorizontal, Shield, UserCog } from 'lucide-react'
-import { createBrowserSupabaseClient } from '@/lib/supabase-client'
 
 interface AdminUsersClientProps {
   initialUsers: UserProfile[]
@@ -40,14 +39,22 @@ export function AdminUsersClient({ initialUsers }: AdminUsersClientProps) {
   const updateUserRole = async (userId: string, newRole: 'user' | 'admin' | 'super_admin') => {
     setLoading(userId)
     try {
-      const supabase = createBrowserSupabaseClient()
-      
-      const { error } = await supabase
-        .from('user_profiles')
-        .update({ role: newRole, updated_at: new Date().toISOString() })
-        .eq('id', userId)
+      const response = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          action: 'update_role',
+          value: newRole,
+        }),
+      })
 
-      if (error) throw error
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to update role')
+      }
 
       setUsers(users.map(u => 
         u.id === userId ? { ...u, role: newRole } : u
@@ -62,14 +69,22 @@ export function AdminUsersClient({ initialUsers }: AdminUsersClientProps) {
   const updateUserTier = async (userId: string, newTier: string) => {
     setLoading(userId)
     try {
-      const supabase = createBrowserSupabaseClient()
-      
-      const { error } = await supabase
-        .from('user_profiles')
-        .update({ subscription_tier: newTier, updated_at: new Date().toISOString() })
-        .eq('id', userId)
+      const response = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          action: 'update_tier',
+          value: newTier,
+        }),
+      })
 
-      if (error) throw error
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to update tier')
+      }
 
       setUsers(users.map(u => 
         u.id === userId ? { ...u, subscription_tier: newTier } : u
