@@ -36,6 +36,7 @@ export function DashboardLayout({ user, children }: DashboardLayoutProps) {
     { label: 'Replies', href: '/replies' },
     { label: 'Calendar', href: '/calendar' },
     { label: 'Analytics', href: '/analytics' },
+    { label: 'Billing', href: '/billing' },
     { label: 'Settings', href: '/settings' },
   ]
 
@@ -92,6 +93,9 @@ export function DashboardLayout({ user, children }: DashboardLayoutProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem asChild>
+                  <Link href="/admin">Admin Panel</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
                   Sign out
                 </DropdownMenuItem>
