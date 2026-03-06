@@ -10,8 +10,7 @@
   // CONFIG
   // ──────────────────────────────────────────────
   const FREE_INVOICE_LIMIT = 3;
-  // REPLACE with your real Flutterwave payment link
-  const FLUTTERWAVE_PAYMENT_LINK = "https://flutterwave.com/pay/XXXXXXXX";
+  const FLUTTERWAVE_PAYMENT_LINK = "https://flutterwave.com/pay/iaiaubuphfru";
   const CURRENCY_SYMBOLS = {
     USD: "$",
     EUR: "\u20AC",
