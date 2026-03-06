@@ -1,0 +1,142 @@
+import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { decrypt } from '@/lib/encryption'
+import { NextRequest, NextResponse } from 'next/server'
+import nodemailer from 'nodemailer'
+
+interface SendEmailRequest {
+  leadId: string
+  sequenceId: string
+  campaignId: string
+  email: string
+  subject: string
+  body: string
+  fromEmail: string
+}
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const supabase = await createServerSupabaseClient()
+    const body = await request.json() as SendEmailRequest
+    const { id: campaignId } = await params
+
+    // Verify user is authenticated
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Verify user owns the campaign before proceeding
+    const { data: campaign, error: campaignCheckError } = await supabase
+      .from('campaigns')
+      .select('workspace_id')
+      .eq('id', body.campaignId)
+      .single()
+
+    if (campaignCheckError || !campaign) {
+      return NextResponse.json(
+        { error: 'Campaign not found' },
+        { status: 404 }
+      )
+    }
+
+    // Verify user owns the workspace that owns this campaign
+    const { data: workspace, error: workspaceError } = await supabase
+      .from('workspaces')
+      .select('owner_id')
+      .eq('id', campaign.workspace_id)
+      .single()
+
+    if (workspaceError || !workspace || workspace.owner_id !== user.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized: You do not have access to this campaign' },
+        { status: 403 }
+      )
+    }
+
+    // Get SMTP credentials
+    const { data: smtpCreds, error: smtpError } = await supabase
+      .from('smtp_credentials')
+      .select('*')
+      .eq('email', body.fromEmail)
+      .single()
+
+    if (smtpError || !smtpCreds) {
+      return NextResponse.json(
+        { error: 'SMTP credentials not found' },
+        { status: 400 }
+      )
+    }
+
+    // Decrypt the password from encrypted storage
+    let decryptedPassword: string
+    try {
+      decryptedPassword = decrypt(smtpCreds.smtp_password_encrypted)
+    } catch (decryptError) {
+      console.error('Error decrypting SMTP password:', decryptError)
+      return NextResponse.json(
+        { error: 'Failed to decrypt SMTP credentials' },
+        { status: 500 }
+      )
+    }
+
+    // Create transporter with decrypted password
+    const transporter = nodemailer.createTransport({
+      host: smtpCreds.smtp_host,
+      port: smtpCreds.smtp_port,
+      secure: smtpCreds.smtp_port === 465,
+      auth: {
+        user: smtpCreds.smtp_user,
+        pass: decryptedPassword,
+      },
+    })
+
+    // Generate tracking token
+    const trackingToken = `${body.leadId}-${body.sequenceId}-${Date.now()}`
+
+    // Add tracking pixel to email
+    const emailBody = `${body.body}\n\n<!-- Tracking pixel -->\n<img src="${process.env.NEXT_PUBLIC_APP_URL}/api/track/${trackingToken}" width="1" height="1" />`
+
+    // Send email
+    await transporter.sendMail({
+      from: body.fromEmail,
+      to: body.email,
+      subject: body.subject,
+      html: emailBody,
+    })
+
+    // Log email send
+    const { error: logError } = await supabase.from('email_logs').insert([
+      {
+        lead_id: body.leadId,
+        sequence_id: body.sequenceId,
+        campaign_id: body.campaignId,
+        tracking_token: trackingToken,
+      },
+    ])
+
+    if (logError) {
+      console.error('Error logging email:', logError)
+    }
+
+    // Update lead status
+    await supabase
+      .from('leads')
+      .update({ status: 'sent' })
+      .eq('id', body.leadId)
+
+    return NextResponse.json({ success: true, trackingToken })
+  } catch (error) {
+    console.error('Error sending email:', error)
+    return NextResponse.json(
+      { error: 'Failed to send email' },
+      { status: 500 }
+    )
+  }
+}
