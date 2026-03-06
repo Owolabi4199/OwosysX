@@ -132,29 +132,29 @@
       const itemEl = document.createElement("div");
       itemEl.setAttribute("data-item-id", id);
       // Mobile: card layout. Desktop: grid row.
-      itemEl.className = "rounded-lg border border-[#1E293B] bg-[#0A0F1C] p-3 sm:border-0 sm:bg-transparent sm:p-0 sm:grid sm:grid-cols-[1fr_80px_110px_110px_40px] sm:gap-3 sm:items-center";
+      itemEl.className = "rounded-lg border border-[#1E293B] bg-[#0A0F1C] p-3 sm:border-0 sm:bg-transparent sm:p-0 sm:grid sm:grid-cols-[1fr_60px_90px_90px_36px] sm:gap-2 sm:items-center lg:grid-cols-[1fr_80px_110px_110px_40px] lg:gap-3";
 
       itemEl.innerHTML =
         '<div class="space-y-2 sm:contents">' +
-        '  <div>' +
+        '  <div class="min-w-0">' +
         '    <label class="mb-1 block text-[10px] font-medium text-[#64748B] sm:hidden">Description</label>' +
         '    <input type="text" data-field="desc" value="' + escapeAttr(desc) + '" placeholder="Item description"' +
-        '      class="w-full rounded-lg border border-[#1E293B] bg-[#111827] px-3 py-2 text-sm text-white placeholder-[#475569] focus:border-[#3B82F6] focus:outline-none focus:ring-1 focus:ring-[#3B82F6]/50 sm:bg-transparent sm:border-[#1E293B]" />' +
+        '      class="w-full rounded-lg border border-[#1E293B] bg-[#111827] px-2 py-2 text-sm text-white placeholder-[#475569] focus:border-[#3B82F6] focus:outline-none focus:ring-1 focus:ring-[#3B82F6]/50 sm:bg-transparent sm:border-[#1E293B] sm:px-3" />' +
         '  </div>' +
         '  <div class="grid grid-cols-3 gap-2 sm:contents">' +
-        '    <div>' +
+        '    <div class="min-w-0">' +
         '      <label class="mb-1 block text-[10px] font-medium text-[#64748B] sm:hidden">Qty</label>' +
         '      <input type="number" data-field="qty" min="0" step="1" value="' + (qty || 1) + '"' +
-        '        class="w-full rounded-lg border border-[#1E293B] bg-[#111827] px-3 py-2 text-sm text-white text-right focus:border-[#3B82F6] focus:outline-none focus:ring-1 focus:ring-[#3B82F6]/50 sm:bg-transparent sm:border-[#1E293B]" />' +
+        '        class="w-full rounded-lg border border-[#1E293B] bg-[#111827] px-2 py-2 text-sm text-white text-right focus:border-[#3B82F6] focus:outline-none focus:ring-1 focus:ring-[#3B82F6]/50 sm:bg-transparent sm:border-[#1E293B] sm:px-3" />' +
         '    </div>' +
-        '    <div>' +
+        '    <div class="min-w-0">' +
         '      <label class="mb-1 block text-[10px] font-medium text-[#64748B] sm:hidden">Price</label>' +
         '      <input type="number" data-field="price" min="0" step="0.01" value="' + (price || 0).toFixed(2) + '"' +
-        '        class="w-full rounded-lg border border-[#1E293B] bg-[#111827] px-3 py-2 text-sm text-white text-right focus:border-[#3B82F6] focus:outline-none focus:ring-1 focus:ring-[#3B82F6]/50 sm:bg-transparent sm:border-[#1E293B]" />' +
+        '        class="w-full rounded-lg border border-[#1E293B] bg-[#111827] px-2 py-2 text-sm text-white text-right focus:border-[#3B82F6] focus:outline-none focus:ring-1 focus:ring-[#3B82F6]/50 sm:bg-transparent sm:border-[#1E293B] sm:px-3" />' +
         '    </div>' +
-        '    <div>' +
+        '    <div class="min-w-0">' +
         '      <label class="mb-1 block text-[10px] font-medium text-[#64748B] sm:hidden">Amount</label>' +
-        '      <div data-field="amount" class="flex items-center justify-end rounded-lg border border-[#1E293B] bg-[#111827]/50 px-3 py-2 text-sm font-mono text-[#94A3B8] sm:bg-transparent sm:border-[#1E293B]">' +
+        '      <div data-field="amount" class="flex items-center justify-end rounded-lg border border-[#1E293B] bg-[#111827]/50 px-2 py-2 text-sm font-mono text-[#94A3B8] sm:bg-transparent sm:border-[#1E293B] sm:px-3 truncate">' +
         '        ' + formatCurrency(amount) +
         '      </div>' +
         '    </div>' +

@@ -5,13 +5,13 @@ export default function InvoicePage() {
     <>
       <div
         id="app-root"
-        className="min-h-screen bg-[#0A0F1C] text-[#E2E8F0] font-sans antialiased"
+        className="min-h-screen bg-[#0A0F1C] text-[#E2E8F0] font-sans antialiased overflow-x-hidden"
       >
         {/* Top Nav */}
         <header className="sticky top-0 z-50 border-b border-[#1E293B] bg-[#0A0F1C]/95 backdrop-blur-md">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#3B82F6]">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-3 sm:px-6">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#3B82F6] sm:h-9 sm:w-9">
                 <svg
                   className="h-5 w-5 text-white"
                   fill="none"
@@ -26,36 +26,36 @@ export default function InvoicePage() {
                   />
                 </svg>
               </div>
-              <div>
-                <h1 className="text-base font-semibold text-white leading-tight">
+              <div className="min-w-0">
+                <h1 className="text-sm font-semibold text-white leading-tight sm:text-base truncate">
                   VantrexTech
                 </h1>
-                <p className="text-xs text-[#64748B]">AI Invoice Assistant</p>
+                <p className="text-[10px] text-[#64748B] sm:text-xs">AI Invoice Assistant</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               <span
                 id="plan-badge"
-                className="rounded-full bg-[#1E293B] px-3 py-1 text-xs font-medium text-[#94A3B8]"
+                className="hidden rounded-full bg-[#1E293B] px-2 py-1 text-[10px] font-medium text-[#94A3B8] sm:inline-flex sm:px-3 sm:text-xs"
               >
                 Free Plan
               </span>
               <button
                 id="btn-upgrade-nav"
                 type="button"
-                className="rounded-lg bg-[#3B82F6] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50"
+                className="rounded-lg bg-[#3B82F6] px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 sm:px-4 sm:py-2 sm:text-xs"
               >
-                Upgrade to Pro
+                Upgrade
               </button>
             </div>
           </div>
         </header>
 
         {/* Main Content */}
-        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+        <main className="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-6">
           {/* AI Assistant Bar */}
           <section className="mb-6">
-            <div className="rounded-xl border border-[#1E293B] bg-[#111827] p-4 sm:p-5">
+            <div className="rounded-xl border border-[#1E293B] bg-[#111827] p-3 sm:p-5">
               <div className="mb-3 flex items-center gap-2">
                 <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[#3B82F6]/20">
                   <svg
@@ -115,14 +115,14 @@ export default function InvoicePage() {
           </section>
 
           {/* Two Column Layout on Desktop */}
-          <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+          <div className="grid gap-6 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_380px]">
             {/* Left: Invoice Form */}
-            <div className="space-y-6">
+            <div className="space-y-6 min-w-0">
               {/* Sender / Client */}
               <div className="grid gap-6 sm:grid-cols-2">
                 {/* From */}
-                <div className="rounded-xl border border-[#1E293B] bg-[#111827] p-5">
-                  <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[#64748B]">
+                <div className="rounded-xl border border-[#1E293B] bg-[#111827] p-3 sm:p-5">
+                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#64748B] sm:mb-4">
                     From (Your Business)
                   </h3>
                   <div className="space-y-3">
@@ -216,8 +216,8 @@ export default function InvoicePage() {
                 </div>
 
                 {/* To */}
-                <div className="rounded-xl border border-[#1E293B] bg-[#111827] p-5">
-                  <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[#64748B]">
+                <div className="rounded-xl border border-[#1E293B] bg-[#111827] p-3 sm:p-5">
+                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#64748B] sm:mb-4">
                     Bill To (Client)
                   </h3>
                   <div className="space-y-3">
@@ -332,8 +332,8 @@ export default function InvoicePage() {
               </div>
 
               {/* Line Items */}
-              <div className="rounded-xl border border-[#1E293B] bg-[#111827] p-5">
-                <div className="mb-4 flex items-center justify-between">
+              <div className="rounded-xl border border-[#1E293B] bg-[#111827] p-3 sm:p-5">
+                <div className="mb-3 flex items-center justify-between sm:mb-4">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-[#64748B]">
                     Line Items
                   </h3>
@@ -360,7 +360,7 @@ export default function InvoicePage() {
                 </div>
 
                 {/* Desktop table header - hidden on mobile */}
-                <div className="mb-2 hidden rounded-lg bg-[#0A0F1C] px-4 py-2.5 sm:grid sm:grid-cols-[1fr_80px_110px_110px_40px] sm:gap-3">
+                <div className="mb-2 hidden rounded-lg bg-[#0A0F1C] px-3 py-2.5 sm:grid sm:grid-cols-[1fr_60px_90px_90px_36px] sm:gap-2 lg:grid-cols-[1fr_80px_110px_110px_40px] lg:gap-3 lg:px-4">
                   <span className="text-xs font-medium text-[#64748B]">
                     Description
                   </span>
@@ -379,7 +379,7 @@ export default function InvoicePage() {
                 <div id="line-items-container" className="space-y-3"></div>
 
                 {/* Tax Row */}
-                <div className="mt-4 flex items-center gap-3 rounded-lg border border-[#1E293B] bg-[#0A0F1C] px-4 py-3">
+                <div className="mt-4 flex items-center gap-3 rounded-lg border border-[#1E293B] bg-[#0A0F1C] px-3 py-2.5 sm:px-4 sm:py-3">
                   <label
                     htmlFor="tax-rate"
                     className="text-xs font-medium text-[#94A3B8] whitespace-nowrap"
@@ -416,10 +416,10 @@ export default function InvoicePage() {
             </div>
 
             {/* Right: Live Preview & Actions */}
-            <aside className="space-y-6">
+            <aside className="space-y-6 min-w-0">
               {/* Summary Card */}
-              <div className="rounded-xl border border-[#1E293B] bg-[#111827] p-5">
-                <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[#64748B]">
+              <div className="rounded-xl border border-[#1E293B] bg-[#111827] p-3 sm:p-5">
+                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#64748B] sm:mb-4">
                   Invoice Summary
                 </h3>
                 <div className="space-y-3">
@@ -536,7 +536,7 @@ export default function InvoicePage() {
               </div>
 
               {/* Invoice History (Pro) */}
-              <div className="rounded-xl border border-[#1E293B] bg-[#111827] p-5">
+              <div className="rounded-xl border border-[#1E293B] bg-[#111827] p-3 sm:p-5">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-[#64748B]">
                     Recent Invoices
@@ -554,7 +554,7 @@ export default function InvoicePage() {
               </div>
 
               {/* Free usage counter */}
-              <div className="rounded-xl border border-[#1E293B] bg-[#111827] p-5">
+              <div className="rounded-xl border border-[#1E293B] bg-[#111827] p-3 sm:p-5">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-medium text-[#94A3B8]">
                     Free Invoices Used
@@ -583,7 +583,7 @@ export default function InvoicePage() {
 
         {/* Footer */}
         <footer className="mt-12 border-t border-[#1E293B] bg-[#0A0F1C]">
-          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+          <div className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-6">
             <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
               <p className="text-xs text-[#475569]">
                 &copy; 2026 VantrexTech. All rights reserved.
@@ -608,9 +608,9 @@ export default function InvoicePage() {
         {/* ===== UPGRADE MODAL ===== */}
         <div
           id="upgrade-modal"
-          className="fixed inset-0 z-[100] hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[100] hidden items-center justify-center bg-black/70 backdrop-blur-sm p-3 sm:p-4"
         >
-          <div className="relative w-full max-w-md rounded-2xl border border-[#1E293B] bg-[#111827] p-6 shadow-2xl">
+          <div className="relative w-full max-w-md rounded-2xl border border-[#1E293B] bg-[#111827] p-4 shadow-2xl sm:p-6">
             <button
               id="btn-close-upgrade"
               type="button"
@@ -758,9 +758,9 @@ export default function InvoicePage() {
         {/* ===== WAITLIST MODAL ===== */}
         <div
           id="waitlist-modal"
-          className="fixed inset-0 z-[100] hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[100] hidden items-center justify-center bg-black/70 backdrop-blur-sm p-3 sm:p-4"
         >
-          <div className="relative w-full max-w-md rounded-2xl border border-[#1E293B] bg-[#111827] p-6 shadow-2xl">
+          <div className="relative w-full max-w-md rounded-2xl border border-[#1E293B] bg-[#111827] p-4 shadow-2xl sm:p-6">
             <button
               id="btn-close-waitlist"
               type="button"
@@ -872,7 +872,7 @@ export default function InvoicePage() {
         {/* ===== TOAST ===== */}
         <div
           id="toast"
-          className="fixed bottom-6 right-6 z-[200] hidden max-w-sm rounded-xl border border-[#1E293B] bg-[#111827] px-5 py-4 shadow-2xl"
+          className="fixed bottom-4 left-3 right-3 z-[200] hidden rounded-xl border border-[#1E293B] bg-[#111827] px-4 py-3 shadow-2xl sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-sm sm:px-5 sm:py-4"
         >
           <div className="flex items-start gap-3">
             <div
